@@ -112,6 +112,7 @@ grade.penalty <- function(sr,sc,SUBJECT,CATALOG_NBR,TERM_RANGE=c(4,156),PDF=FALS
   #turn on the PDF device if PDF output is requested.
   if (PDF == TRUE){pdf(paste(SUBJECT,CATALOG_NBR,'.pdf',sep=""),width=11,height=7)}
   
+  par(mfrow=c(1,1))
   if (GROUP != 'NONE')
   {
     plot.binned.grades(mal.binned,title,col='black')
@@ -164,6 +165,26 @@ if (MATCHING == TRUE)
   text(1,2.75,'MATCHED MEAN GRADE:',pos=4)
   text(1,2.5,paste(ltitle1,mmn,'+/-',mse,sep=" "),pos=4)
   text(1,2.25,paste(ltitle2,fmn,'+/-',fse,sep=" "),col='red',pos=4)
+  
+  if (VERBOSE==TRUE)
+  {
+    par(mfrow=c(2,2))
+    hist(gg$ACT.MATH.F-gg$ACT.MATH.M,psym=19,xlim=c(-3,3),breaks=100)
+    
+    hist(gg$HSGPA.F-gg$HSGPA.M,psym=19,xlim=c(-1,1),breaks=100)
+    hist(gg$GPAO.F-gg$GPAO.M,psym=19,xlim=c(-1,1),breaks=100)
+    plot((gg$GPAO.F-gg$GPAO.M)/(gg$GPAO.F+gg$GPAO.M),
+        (gg$ACT.MATH.F-gg$ACT.MATH.M)/(gg$ACT.MATH.F+gg$ACT.MATH.M),pch=19,cex=0.5)
+    par(mfrow=c(1,1))
+    
+    print(mean(gg$GPAO.F-gg$GPAO.M,na.rm=TRUE))
+    print(sd(gg$GPAO.F-gg$GPAO.M,na.rm=TRUE))
+    print(mean(gg$ACT.MATH.F-gg$ACT.MATH.M,na.rm=TRUE))
+    print(sd(gg$ACT.MATH.F-gg$ACT.MATH.M,na.rm=TRUE))
+    print(mean(gg$HSGPA.F-gg$HSGPA.M,na.rm=TRUE))
+    print(sd(gg$HSGPA.F-gg$HSGPA.M,na.rm=TRUE))
+    
+  }
   
   out <- data.frame(out,MATCHED_MEAN_GROUP1,MATCHED_SE_GROUP1,MATCHED_MEAN_GROUP2,MATCHED_SE_GROUP2)
 }
@@ -306,6 +327,9 @@ matching.analysis <- function(data,VERBOSE=VERBOSE)
                  data$HSGPA > 0 
     data      <- data[which(e),]  
     
+    #Randomize columns to check the effect
+    #e <- data$SEG == 1
+    #data$LAST_ACT_MATH_SCORE[e] <- sample(data$LAST_ACT_MATH_SCORE,which(e))
     #Define/coerce the matching variables.
     #SEG       <- mat.or.vec(length(data$ANONID),1)
     #e         <- data$SEG == 1
@@ -321,7 +345,7 @@ matching.analysis <- function(data,VERBOSE=VERBOSE)
     #Supply matching propensity scores
     model <- glm(SEG ~ ACT.MATH+ACT.ENGL+GPAO+HSGPA,family=binomial(),data=data)
     #...and execute the matching with a caliper set at 0.2 to increase speed...
-     m1    <- fullmatch(match_on(model,caliper=0.2),data=data)
+     m1    <- fullmatch(match_on(model,caliper=0.1),data=data)
     
     #Now attach the matching structure to the data
     data <- cbind(data,matches=as.numeric(substr(m1,3,7)))
@@ -342,8 +366,15 @@ matching.analysis <- function(data,VERBOSE=VERBOSE)
     #Note that this matching ONLY considers one-to-one matching, as opposed to averaging
     #all N matches to a single individuals.
     
-    gpenf <- mat.or.vec(nid,1)
-    gpenm <- gpenf
+    gpenf        <- mat.or.vec(nid,1)
+    gpenm        <- gpenf
+    ACT.MATH.F   <- gpenf
+    ACT.MATH.F[] <- NA
+    ACT.MATH.M   <- ACT.MATH.F
+    HSGPA.F      <- ACT.MATH.F
+    HSGPA.M      <- ACT.MATH.F
+    GPAO.F       <- ACT.MATH.F
+    GPAO.M       <- ACT.MATH.F
     
     for (i in 1:nid)
     {
@@ -353,9 +384,18 @@ matching.analysis <- function(data,VERBOSE=VERBOSE)
       ind <- c(start_ind:stop_ind)
       gpenf[i] <- as.numeric(data$GRADE[stop_ind])
       gpenm[i] <- as.numeric(data$GRADE[start_ind])
+      
+      ACT.MATH.F[i] <- data$ACT.MATH[stop_ind]
+      ACT.MATH.M[i] <- data$ACT.MATH[start_ind]  
+      #ACT.MATH.M[i] <- sample(data$ACT.MATH,1)
+      HSGPA.F[i]    <- data$HSGPA[stop_ind]
+      HSGPA.M[i]    <- data$HSGPA[start_ind]
+      GPAO.F[i]     <- data$GPAO[stop_ind]
+      GPAO.M[i]     <- data$GPAO[start_ind]
+      
     }
     
-    return(data.frame(gpenm,gpenf,nid))
+    return(data.frame(gpenm,gpenf,nid,ACT.MATH.F,ACT.MATH.M,HSGPA.F,HSGPA.M,GPAO.F,GPAO.M))
   }  
   
 #####################################################################################
