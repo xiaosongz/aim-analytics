@@ -11,11 +11,12 @@
 #          REGRESSION  - Run a basic linear regression, return the coefficient on the gender term.
 #          MATCHING    - Run a matching analysis to compare grades of matched males and females.
 #          GROUP       - GENDER by default. Set to NONE for aggregate, or one of student groups A,B,C,D,E,F,G
+#          VERBOSE     - FALSE by default. If TRUE, prints regression table, VIEWS matching structure
 #OUTPUTS : Plots sent to grade.penalty.pdf in the CWD. test.
 #NOTES   : Uses optmatch package (https://cran.r-project.org/web/packages/optmatch/index.html) with MATCHING=TRUE
 #EXAMPLE: out <- grade.penalty(sr,sc,'PHYSICS',135,GROUP='GENDER',REGRESSION=TRUE,MATCHING=TRUE)
 #####################################################################################
-grade.penalty <- function(sr,sc,SUBJECT,CATALOG_NBR,TERM_RANGE=c(4,156),PDF=FALSE,REGRESSION=FALSE,MATCHING=FALSE,GROUP='GENDER')
+grade.penalty <- function(sr,sc,SUBJECT,CATALOG_NBR,TERM_RANGE=c(4,156),PDF=FALSE,REGRESSION=FALSE,MATCHING=FALSE,GROUP='GENDER',VERBOSE=FALSE)
 {  
   
   #Do some basic error checking
@@ -149,7 +150,7 @@ grade.penalty <- function(sr,sc,SUBJECT,CATALOG_NBR,TERM_RANGE=c(4,156),PDF=FALS
 #Do matching, print result to plot, add to output table.
 if (MATCHING == TRUE)
 {  
-  gg <- matching.analysis(data)
+  gg <- matching.analysis(data,VERBOSE=VERBOSE)
   MATCHED_MEAN_GROUP1   <- mean(gg$gpenm)
   MATCHED_SE_GROUP1     <- sd(gg$gpenm)/sqrt(length(gg$gpenm))
   MATCHED_MEAN_GROUP2 <- mean(gg$gpenf)
@@ -171,8 +172,8 @@ if (MATCHING == TRUE)
 if (REGRESSION == TRUE)
 {
  uber_reg <- grade.regression(data)
- #print(summary(uber_reg))
  res <- summary(uber_reg)
+ if (VERBOSE == TRUE){print(res)}
  GROUP_REG    <- res$coefficients[3,1]
  GROUP_REG_SE <- res$coefficients[3,2]
  text(1,3.0,paste('GROUP_REG_COEFF:',signif(GROUP_REG,3),'+/-',signif(GROUP_REG_SE,3)),pos=4)
@@ -296,7 +297,7 @@ compute.gpa.binned.grades <- function(data,nbins=10)
 #          
 #OUTPUTS : A data frame containing binned grade/gpao statistics for plotting..
 #####################################################################################  
-matching.analysis <- function(data)
+matching.analysis <- function(data,VERBOSE=VERBOSE)
 {
     library(optmatch)
     print('matching')
@@ -324,6 +325,7 @@ matching.analysis <- function(data)
     
     #Now attach the matching structure to the data
     data <- cbind(data,matches=as.numeric(substr(m1,3,7)))
+    if (VERBOSE == TRUE){View(data)}
     out <- data
     
     #And sort once for speed, computing mean grades for the matched groups
