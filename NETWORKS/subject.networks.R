@@ -11,9 +11,15 @@
 #EXAMPLE: R> out <- subject.networks(sr,sc)
 #
 ############
-subject.networks <- function(sr,sc,ADMIT_TERM=1810,COURSE_TERM=1810,title='NONE')
+subject.networks <- function(sr,sc,ADMIT_TERM=114,COURSE_TERM=114,title='NONE')
 {
  
+  #This allows flexibility to move between MOOC data and local data
+  e <- names(sr) == 'ANONID'
+  names(sr)[e] <- 'EMPLID'
+  e <- names(sc) == 'ANONID'
+  names(sc)[e] <- 'EMPLID'
+  
   library(gplots)                       #call the library containing heatmap.2
   library(circlize)                     #chordDiagram library
   library(igraph)                       #all the networking stuff we need.
