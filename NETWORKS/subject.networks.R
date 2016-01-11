@@ -1,5 +1,5 @@
 #this takes the student course and student record tables as inputs
-#and creates
+#
 #sc : student course
 #sr : student record
 #ADMIT_TERM: which cohort of students to consider
@@ -64,7 +64,7 @@ subject.networks <- function(sr,sc,ADMIT_TERM=114,COURSE_TERM=114,title='NONE')
     start_ind <- nstart[i]
     if (i < nid){stop_ind  <- nstart[i+1]-1}
     if (i == nid){stop_ind <- ntot}
-    ind <- c(start_ind:stop_ind)
+    ind <- c(start_ind:stop_ind)       #indices of all rows containing student i's data
     
     sub <- data[ind,]
     nstsub <- which(sub$COUNT2 == 1)
@@ -98,7 +98,7 @@ subject.networks <- function(sr,sc,ADMIT_TERM=114,COURSE_TERM=114,title='NONE')
   heatmap.2(a1,trace='none',main=title) #plot the heatmap
   
   
-  #Now create networks for different correlation thresholds
+  #Now create and plot networks for different correlation thresholds
   for (i in 1:10)
   {
     thresh <- 0.05*i+0.1     #set the correlation threshold
@@ -124,7 +124,7 @@ subject.networks <- function(sr,sc,ADMIT_TERM=114,COURSE_TERM=114,title='NONE')
     
   }
   
-  chordDiagram(adj,directional=TRUE,symmetric=TRUE)
+  chordDiagram(adj,directional=TRUE,symmetric=TRUE) #make the chord diagram
   
   return(gobj)
 }
