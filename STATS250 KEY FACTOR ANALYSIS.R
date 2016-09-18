@@ -19,11 +19,40 @@ require("dplyr")
 Course <-tbl_df(student.course)
 Record <-tbl_df(student.record)
 glimpse(Course)
+glimpse(Record)
 names(Course)
+names(Record)
 levels(Course$SUBJECT)
 STATS250 = filter(Course,SUBJECT =='STATS' & CATALOG_NBR == '250')
 
-STATS250.Aggregate <- inner_join(STATS250,Record,by = 'ANONID')
+S.A = STATS250.Aggregate <- inner_join(STATS250,Record,by = 'ANONID')
 
-dim(STATS250.Aggregate)
-compute.overall.grade.penalty(STATS250.Aggregate)
+summary(S.A)
+
+fit <- lm(GRD_PTS_PER_UNIT~ HSGPA +
+            LAST_ACT_ENGL_SCORE+
+            LAST_ACT_MATH_SCORE+
+            LAST_ACT_READ_SCORE  ,data = S.A)
+summary(fit)
+# fit <- princomp(S.A, cor=TRUE)
+# summary(fit) # print variance accounted for 
+# loadings(fit) # pc loadings 
+# plot(fit,type="lines") # scree plot 
+# fit$scores # the principal components
+# biplot(fit)
+
+hist(student.course$CATALOG_NBR)
+
+hist(student.record$HSGPA)
+summary(student.record$LAST_SATI_VERB_SCORE)
+summary(student.record$LAST_SATI_MATH_SCORE)
+summary(student.record$LAST_ACT_COMP_SCORE)
+filter(student.record, HSGPA>4.0)
+
+require(psych)
+myData <- S.A
+describe(myData)
+pairs.panels(myData)
+lowerCor(myData)
+
+fa(myData)
