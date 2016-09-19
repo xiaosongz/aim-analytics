@@ -1,0 +1,49 @@
+---
+title: "SimpleStatisticalAnalysis"
+author: "Xiaosong Zhang"
+date: "9/18/2016"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##STATS250 KEY FACTOR ANALYSIS
+**Please answer the following question:  Other than GPAO, which variable(s) best predict the variable for GRD_PTS_PER_UNIT for the course STATS 250 (SUBJECT="STATS" and CATALOG_NBR=250)? In other words, what is the best predictor of a student's performance in STATS 250 other than the student's own GPA?**
+
+##Data Importation
+
+```{r}
+require("dplyr")
+require("ggplot2")
+#sourceDir is use to source all .r file under same Dir all in once
+sourceDir <- function(path, trace = TRUE, ...) {
+  for (nm in list.files(path, pattern = "[.][RrSsQq]$")) {
+    if(trace) cat(nm,":")
+    source(file.path(path, nm), ...)
+    if(trace) cat("\n")
+  }
+}
+#Source all functions uder PLA-MOOC into R-Environment for future use.
+sourceDir('PLA-MOOC')
+#loading data into Environment
+student.course <- read.csv("PLA-MOOC/student.course.csv")
+student.record <- read.csv("PLA-MOOC/student.record.csv")
+```
+
+##Data Exploration
+
+```{r}
+summary(student.record)
+summary(student.course)
+
+# = 36? it most likely to be a error
+# UM admit students with HSGPA 0?? or it should be NAs?
+filter(student.record, HSGPA>4.0)
+# many of those who have HSGPA = 0 have LAST_ACT_MATH_SCORE close to Max 
+# Cloud be a evidence their HSGPA should be NA instead of 0.
+
+summary(filter(student.record, HSGPA< 1 & LAST_ACT_MATH_SCORE >35 ))
+
+```
