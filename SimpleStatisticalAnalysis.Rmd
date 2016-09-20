@@ -197,8 +197,10 @@ lillie.test(GRD_PTS_PER_UNIT)
 ```{r}
 fit.SatVsAct <- lm(LAST_SATI_MATH_SCORE~LAST_ACT_MATH_SCORE) 
 summary(fit.SatVsAct)
-par(mfrow=c(2,2))
-plot(fit.SatVsAct)
+
+# these plot make pdf tooo big
+#par(mfrow=c(2,2))
+#plot(fit.SatVsAct)
 ```
 
 There are `r count(filter(S.A, LAST_ACT_MATH_SCORE> 0 ))` students have ACT math score, `r count(filter(S.A, LAST_SATI_MATH_SCORE> 0 ))` students have SAT math score, but only `r count(filter(S.A, LAST_SATI_MATH_SCORE> 0 & LAST_ACT_MATH_SCORE> 0))` students have both. It will be a huge lose if we use both SAT and ACT math score as explanary variables.
@@ -220,16 +222,16 @@ The $r^2$ is very low, I believe the wrongly placed 2000 '0's under HSGPA should
 S.A.c<- filter(S.A, HSGPA>0 & LAST_ACT_MATH_SCORE > 0)
 fit.GRDc <- lm(data = S.A.c, GRD_PTS_PER_UNIT~HSGPA + LAST_ACT_MATH_SCORE+SEX)
 summary(fit.GRDc)
-par(mfrow=c(2,2))
-plot(fit.GRDc)
+#par(mfrow=c(2,2))
+#plot(fit.GRDc)
 ```
 
 ```{r}
 
 fit.GRDb <- lm(data = S.A.c, GRD_PTS_PER_UNIT~HSGPA +LAST_ACT_COMP_SCORE+ LAST_ACT_MATH_SCORE +SEX)
 summary(fit.GRDb)
-par(mfrow=c(2,2))
-plot(fit.GRDb)
+#par(mfrow=c(2,2))
+#plot(fit.GRDb)
 ```
 
 ```{r}
