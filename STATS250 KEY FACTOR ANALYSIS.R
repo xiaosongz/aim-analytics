@@ -4,6 +4,10 @@
 #what is the best predictor of a student's performance in STATS 250 other than the student's own GPA? 
 require("dplyr")
 require(ggplot2)
+
+#set working directory to current .r file path
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
 #sourceDir is use to source all .r file under same Dir all in once
 sourceDir <- function(path, trace = TRUE, ...) {
   for (nm in list.files(path, pattern = "[.][RrSsQq]$")) {
@@ -23,13 +27,15 @@ student.record <- read.csv("PLA-MOOC/student.record.csv")
 summary(student.record)
 summary(student.course)
 
-# = 36? it most likely to be a error
+# HSGPA = 36? it most likely to be a error
 # UM admit students with HSGPA 0?? or it should be NAs?
+
 filter(student.record, HSGPA>4.0)
+
 # many of those who have HSGPA = 0 have LAST_ACT_MATH_SCORE close to Max 
 # Cloud be a evidence their HSGPA should be NA instead of 0.
 
-summary(filter(student.record, HSGPA< 1 & LAST_ACT_MATH_SCORE >35 ))
+count(filter(student.record, HSGPA< 1 & LAST_ACT_MATH_SCORE >34 ))
 
 #prepare data for dplyr
 Course <-tbl_df(student.course)
@@ -50,20 +56,22 @@ attach(S.A)
 #Check
 glimpse(S.A)
 summary(S.A)
-summary(SEX)
+table(SEX)
 summary(LAST_ACT_MATH_SCORE)
+qplot(LAST_ACT_MATH_SCORE,bins = 14)
+table(LAST_ACT_MATH_SCORE)
 summary(LAST_SATI_MATH_SCORE)
 summary(HSGPA)
 hist(HSGPA)
 hist(LAST_ACT_MATH_SCORE)
 hist(LAST_SATI_MATH_SCORE)
-qplot(LAST_ACT_MATH_SCORE,x =LAST_SATI_MATH_SCORE)
+qplot(LAST_ACT_MATH_SCORE,x =LAST_SATI_MATH_SCORE,colour = SEX)
 
 
-qplot(HSGPA)
+qplot(HSGPA,colour = SEX,bins = 40)
 
  
-fit.SatVsAct <- lm(LAST_SATI_MATH_SCORE~LAST_ACT_MATH_SCORE+HSGPA+SEX) 
+fit.SatVsAct <- lm(LAST_SATI_MATH_SCORE~LAST_ACT_MATH_SCORE) 
 plot(fit.SatVsAct)
 
 
