@@ -25,6 +25,7 @@ ompiled source #
 *.log
 *.sql
 *.sqlite
+*.sas7bdat
 
 # OS generated files #
 ######################
