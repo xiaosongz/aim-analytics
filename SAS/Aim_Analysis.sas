@@ -1,13 +1,26 @@
 /*__________________________________________________________________________________*/
 */ Re-write University of Michigan Stat-250 Course Performance Analysis in SAS      */
 */ Created By: Xiaosong Zhang on 2/15/2017                                          */
-*/ All the data and .sas programs are avaliable at git.xiaosongz.com                 */
+*/ All the data and .sas programs are avaliable at git.xiaosongz.com                */
 */ under aim-analytics repository or use https://github.com/xiaosongz/aim-analytics */
 /************************************************************************************/
 
-*set library location(On 6700K&GTX1080); 
+*set library location(On 6700KGTX1080); 
 LIBNAME Aim "C:\Users\xiaosong\Documents\GitHub\aim-analytics\SAS";
 ods rtf file='output.rtf';
+/* Some logs included to demostrate the dimension of the two data tables used in this analysis*/
+/*
+NOTE: There were 1327065 observations read from the data set AIM.STUDENTCOURSE.
+NOTE: The data set AIM.SC has 1327065 observations and 8 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.31 seconds
+      cpu time            0.29 seconds
+NOTE: There were 138888 observations read from the data set AIM.STUDENTRECORD.
+NOTE: The data set AIM.SR has 138888 observations and 23 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.14 seconds
+      cpu time            0.14 seconds
+*/
 
 *load neccessary MACROs might be useful later;
 %INCLUDE "density.sas";
@@ -108,7 +121,7 @@ run;
 
 /*     Create a macro to do EDA, regression, and residual plotting      */
 /*Retrieved from http://www.stat.cmu.edu/~hseltman/SASworkshop/macro.sas*/
-
+/*     Modified by Xiaosong Zhang                                       */
 %macro regAndPlot(data, y, x);
     /* Double quotes are needed to allow substitution */
     TITLE "EDA of &data: &y on &x";
@@ -144,7 +157,7 @@ run;
       VAR res;
       QQPLOT / NORMAL (MU=0 SIGMA=&resSD COLOR=red);
     RUN;
-	/**/
+	/*Residual vs fit plot Visualization*/
     TITLE2 'Residual vs. fit plot';
     PROC GPLOT DATA=_temp;
       PLOT res*pred / VREF=0;
@@ -153,12 +166,16 @@ run;
 
 
 /* regAndPlot Macro retrieved from CMU SAS workshop website*/
+/*Use regAndPlot to do  mutiple EDA, some lines quoted to reduce the length of output*/
 *%regAndPlot(Aim.STATS250C, GRD_PTS_PER_UNIT, HSGPA1 );
 %regAndPlot(Aim.STATS250C, GRD_PTS_PER_UNIT, GPAO);
 *%regAndPlot(Aim.STATS250C, GRD_PTS_PER_UNIT, LAST_ACT_MATH);
 *%regAndPlot(Aim.STATS250C, GRD_PTS_PER_UNIT, LAST_SATI_MATH);
 
 RUN;
+
+/*Showing fit a model using PROC GLM, more models and classifiers were tested using R and Python
+code Can be re-write in SAS upon request */
 PROC GLM DATA= Aim.STATS250C;
     CLASS SEX;
 	MODEL GRD_PTS_PER_UNIT = GPAO SEX HSGPA1 LAST_ACT_MATH /SOLUTION;
@@ -166,3 +183,4 @@ PROC GLM DATA= Aim.STATS250C;
 ods rtf close;
 
 /*This is the end of this program*/
+/*If you have any questions please do not hesitate to contact me @ xiaosong.zhang@utoledo.edu*/
